@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
 import { createTaskAssignment } from "../../../utils/fetchTaskAssignment";
 import { Button } from "../../../sharedComponents/Button";
@@ -17,6 +17,7 @@ export default function TasksDetails() {
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(true);
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
 
   const filteredTasks = tasks.filter((task) =>
     task.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -83,6 +84,12 @@ export default function TasksDetails() {
     setIsAddMode(false);
   };
 
+  const priorityColors: { [key: string]: string } = {
+    high: "bg-red-600",
+    medium: "bg-orange-300",
+    low: "bg-green-500",
+  };
+
   if (error) {
     return (
       <div className="p-6 min-h-screen bg-gray-50 flex justify-center items-center">
@@ -144,30 +151,81 @@ export default function TasksDetails() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.06 }}
-            className={`bg-white rounded-[50px] p-3 mr-10 drop-shadow-lg border border-gray-200 flex items-center gap-4 ${
+            className={`bg-white rounded-[20vh] p-4 mr-10 drop-shadow-lg text-xl border border-gray-200 ${
               isAddMode ? "cursor-pointer hover:bg-gray-50" : ""
             }`}
             onClick={isAddMode ? () => handleTaskToggle(task.id) : undefined}
           >
-            <AnimatePresence>
-              {isAddMode && (
+            <div className="flex items-center gap-4">
+              <AnimatePresence>
+                {isAddMode && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Checkbox
+                      checked={selectedTasks.has(task.id)}
+                      onCheckedChange={() => handleTaskToggle(task.id)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  priorityColors[task.priority] || "bg-gray-300"
+                }`}
+              ></div>
+
+              <div className="flex-1">
+                <p className="text-gray-800">{task.title}</p>
+              </div>
+
+              {!isAddMode && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedTaskId(
+                      expandedTaskId === task.id ? null : task.id
+                    );
+                  }}
+                  className="cursor-pointer p-2"
+                  animate={{ rotate: expandedTaskId === task.id ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Checkbox
-                    checked={selectedTasks.has(task.id)}
-                    onCheckedChange={() => handleTaskToggle(task.id)}
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="border-black text-blue-950"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </motion.div>
+              )}
+            </div>
+
+            <AnimatePresence>
+              {expandedTaskId === task.id && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="mt-2 pl-11"
+                >
+                  <p className="text-gray-600 text-lg">{task.description}</p>
                 </motion.div>
               )}
             </AnimatePresence>
-
-            <div className="flex-1">
-              <p className="text-gray-800">{task.title}</p>
-            </div>
           </motion.div>
         ))}
       </div>

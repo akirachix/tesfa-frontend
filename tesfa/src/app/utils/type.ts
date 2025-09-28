@@ -1,4 +1,5 @@
 export type TaskStatus = "pending" | "in_progress" | "cancelled" | "completed";
+export type Priority = "high" | "medium" | "low";
 
 export interface Task {
   id: string;
@@ -6,6 +7,7 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   assignmentId?: number;
+  priority: Priority;
   
 }
 
@@ -14,6 +16,7 @@ export interface ApiTask {
   title: string;
   description: string;
   assignments: { status: string }[];
+  priority: Priority;
 }
 
 

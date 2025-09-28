@@ -18,6 +18,15 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       });
 
 
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`Backend API error for task ${id}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody,
+      });
+    return new Response(errorBody, { status: response.status });
+    }
     const result = await response.json();
   
     return new Response(JSON.stringify(result),
