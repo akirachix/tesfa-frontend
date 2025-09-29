@@ -63,16 +63,16 @@ export function TaskCard({ task, index, onDelete }: TaskCardProps) {
         onClick={() => {
           onDelete(task.id);
         }}
-        className='absolute top-2 right-2 p-1 rounded-full bg-gray-700 hover:bg-gray-800 cursor-pointer text-white opacity-0 group-hover:opacity-100 transition-opacity'>
+        className='absolute top-2 right-2 p-1 rounded-full bg-gray-700 hover:bg-gray-800 cursor-pointer text-white opacity-0 group-hover:opacity-100 transition-opacity z-10'>
           <LuTrash2 size={16}/>
         </button>
       
-      <div className={`${getCardColor(task.status)} border-none rounded-2xl h-20vh text-white p-4 mb-3 shadow-lg hover:shadow-xl transition-shadow`}>
-       <div {...listeners} {...attributes}>
-        <div className="space-y-2">
-          <h4 className="font-medium">{task.title}</h4>
+      <div className={`${getCardColor(task.status)} border-none rounded-2xl h-[20vh] sm:h-[18vh] md:h-[20vh] text-white p-3 sm:p-4 mb-3 shadow-lg hover:shadow-xl transition-shadow w-full`}>
+       <div {...listeners} {...attributes} className="w-full">
+        <div className="space-y-1 sm:space-y-2">
+          <h4 className="font-medium text-lg sm:text-base">{task.title}</h4>
           {task.description && (
-            <p className="text-sm text-gray-200 opacity-90">{task.description}</p>
+            <p className="text-xs sm:text-sm text-gray-200 opacity-90 line-clamp-2">{task.description}</p>
           )}
         </div>
         </div>

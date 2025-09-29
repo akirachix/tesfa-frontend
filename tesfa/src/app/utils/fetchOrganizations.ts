@@ -29,7 +29,9 @@ export async function fetchProfile() {
   }
 }
 
-export async function updateUser(data: any) {
+type UserUpdateData = Record<string, string | number | boolean>;
+
+export async function updateUser(data: FormData | UserUpdateData) {
   const token = getToken();
   const userId = getUserId();
 
@@ -63,6 +65,7 @@ export async function updateUser(data: any) {
     throw new Error((error as Error).message || 'Invalid response format from server.');
   }
 }
+
 
 export async function fetchUsers(): Promise<User[]> {
   const token = getToken();

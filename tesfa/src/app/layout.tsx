@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Josefin_Sans } from "next/font/google";
-import Sidebar from "./sharedComponents/SideBar";
 
 const josefinSans = Josefin_Sans({
   subsets: ["latin"],

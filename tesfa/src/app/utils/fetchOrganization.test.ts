@@ -41,7 +41,7 @@ describe('fetchProfile', () => {
   it('throws if no user_id in localStorage', async () => {
     (getToken as jest.Mock).mockReturnValue('abc123');
     mockLocalStorage.getItem.mockImplementation((key) =>
-      key === 'Token' ? 'abc123' : null
+      key === 'token' ? 'abc123' : null
     );
 
     await expect(fetchProfile()).rejects.toThrow('No user ID found in localStorage.');
@@ -111,7 +111,7 @@ describe('updateUser', () => {
   it('throws if no user_id in localStorage', async () => {
     (getToken as jest.Mock).mockReturnValue('abc123');
     mockLocalStorage.getItem.mockImplementation((key) =>
-      key === 'Token' ? 'abc123' : null
+      key === 'token' ? 'abc123' : null
     );
 
     await expect(updateUser(mockData)).rejects.toThrow('No user ID found in localStorage.');
@@ -194,7 +194,6 @@ describe('updateUser', () => {
       if (key === 'user_id') return '123';
       return null;
     });
-
     (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network failure'));
 
     await expect(updateUser(mockData)).rejects.toThrow('Network failure');

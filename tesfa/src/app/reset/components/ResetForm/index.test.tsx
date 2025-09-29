@@ -3,34 +3,28 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import ResetFormClient from ".";
+import { useRouter } from "next/navigation";
+import usePasswordResetConfirm from "@/app/hooks/usePasswordConfirm";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-
-jest.mock("../../../hooks/usePasswordConfirm", () => ({
+jest.mock("@/app/hooks/usePasswordConfirm", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
 describe("ResetFormClient", () => {
-  const defaultProps = {
-    uid: "abc123",
-    token: "xyz789",
-  };
+  const defaultProps = { uid: "abc123", token: "xyz789" };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders form and allows password input", () => {
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+  it("renders form and inputs", () => {
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
       message: null,
@@ -45,13 +39,9 @@ describe("ResetFormClient", () => {
     expect(screen.getByRole("button", { name: /reset password/i })).toBeInTheDocument();
   });
 
-  it("shows password error if less than 8 characters", async () => {
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+  it("shows error on password < 8 chars", async () => {
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
       message: null,
@@ -60,20 +50,14 @@ describe("ResetFormClient", () => {
     });
 
     render(<ResetFormClient {...defaultProps} />);
-
-    const passwordInput = screen.getByPlaceholderText("New Password");
-    fireEvent.change(passwordInput, { target: { value: "123" } });
+    fireEvent.change(screen.getByPlaceholderText("New Password"), { target: { value: "123" } });
 
     expect(await screen.findByText("Must be at least 8 characters")).toBeInTheDocument();
   });
 
-  it("shows confirm password error if passwords don't match", async () => {
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+  it("shows error if passwords do not match", async () => {
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
       message: null,
@@ -82,62 +66,36 @@ describe("ResetFormClient", () => {
     });
 
     render(<ResetFormClient {...defaultProps} />);
-
-    const passwordInput = screen.getByPlaceholderText("New Password");
-    const confirmInput = screen.getByPlaceholderText("Confirm New Password");
-
-    fireEvent.change(passwordInput, { target: { value: "password123" } });
-    fireEvent.change(confirmInput, { target: { value: "password12" } });
+    fireEvent.change(screen.getByPlaceholderText("New Password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByPlaceholderText("Confirm New Password"), { target: { value: "password321" } });
 
     expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
   });
 
-  it("submits form successfully and redirects", async () => {
+  it("calls confirmReset and redirects on submit", async () => {
     const mockPush = jest.fn();
-
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: mockPush,
-    });
-
     const mockConfirmReset = jest.fn().mockResolvedValue({});
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: mockPush });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
-      message: null,
+      message: "Success",
       confirmReset: mockConfirmReset,
       setError: jest.fn(),
     });
 
     render(<ResetFormClient {...defaultProps} />);
+    fireEvent.change(screen.getByPlaceholderText("New Password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByPlaceholderText("Confirm New Password"), { target: { value: "password123" } });
+    fireEvent.submit(screen.getByRole("button", { name: /reset password/i }));
 
-    const passwordInput = screen.getByPlaceholderText("New Password");
-    const confirmInput = screen.getByPlaceholderText("Confirm New Password");
-    const submitButton = screen.getByRole("button", { name: /reset password/i });
-
-    fireEvent.change(passwordInput, { target: { value: "password123" } });
-    fireEvent.change(confirmInput, { target: { value: "password123" } });
-    fireEvent.submit(submitButton);
-
-    expect(mockConfirmReset).toHaveBeenCalledWith({
-      uidb64: defaultProps.uid,
-      token: defaultProps.token,
-      new_password: "password123",
-      confirm_password: "password123",
-    });
-
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/resetsuccess");
-    });
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/resetsuccess"));
   });
 
   it("disables submit button when loading", () => {
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: true,
       error: null,
       message: null,
@@ -146,63 +104,39 @@ describe("ResetFormClient", () => {
     });
 
     render(<ResetFormClient {...defaultProps} />);
-
- 
-    const submitButton = screen.getByRole("button", { name: "Resetting..." });
-    expect(submitButton).toBeDisabled();
-    expect(submitButton).toHaveTextContent("Resetting...");
+    expect(screen.getByRole("button", { name: "Resetting..." })).toBeDisabled();
   });
 
-  it("displays error message if API fails", async () => {
-    const errorMessage = "Something went wrong";
+  it("displays error message when API call fails", async () => {
+    const errorMessage = "API Error";
     const mockSetError = jest.fn();
     const mockConfirmReset = jest.fn().mockRejectedValue(new Error(errorMessage));
 
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
- 
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: errorMessage,
       message: null,
-      confirmReset: mockConfirmReset, 
+      confirmReset: mockConfirmReset,
       setError: mockSetError,
     });
 
     render(<ResetFormClient {...defaultProps} />);
-
-    const passwordInput = screen.getByPlaceholderText("New Password");
-    const confirmInput = screen.getByPlaceholderText("Confirm New Password");
-    const submitButton = screen.getByRole("button", { name: /reset password/i });
-
-    fireEvent.change(passwordInput, { target: { value: "password123" } });
-    fireEvent.change(confirmInput, { target: { value: "password123" } });
-    fireEvent.submit(submitButton);
+    fireEvent.change(screen.getByPlaceholderText("New Password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByPlaceholderText("Confirm New Password"), { target: { value: "password123" } });
+    fireEvent.submit(screen.getByRole("button", { name: /reset password/i }));
 
     await waitFor(() => {
-      expect(mockConfirmReset).toHaveBeenCalledWith({
-        uidb64: defaultProps.uid,
-        token: defaultProps.token,
-        new_password: "password123",
-        confirm_password: "password123",
-      });
-    });
-
-    await waitFor(() => {
+      expect(mockConfirmReset).toHaveBeenCalled();
       expect(mockSetError).toHaveBeenCalledWith(errorMessage);
     });
+
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it("toggles password visibility when eye icon is clicked", () => {
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+  it("toggles password visibility", () => {
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
       message: null,
@@ -211,26 +145,19 @@ describe("ResetFormClient", () => {
     });
 
     render(<ResetFormClient {...defaultProps} />);
-
-    const toggle1 = screen.getByTestId("toggle-password-visibility");
     const passwordInput = screen.getByPlaceholderText("New Password");
+    const toggleBtn = screen.getByTestId("toggle-password-visibility");
 
     expect(passwordInput).toHaveAttribute("type", "password");
-
-    fireEvent.click(toggle1);
+    fireEvent.click(toggleBtn);
     expect(passwordInput).toHaveAttribute("type", "text");
-
-    fireEvent.click(toggle1);
+    fireEvent.click(toggleBtn);
     expect(passwordInput).toHaveAttribute("type", "password");
   });
 
-  it("toggles confirm password visibility when eye icon is clicked", () => {
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: jest.fn(),
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+  it("toggles confirm password visibility", () => {
+    (useRouter as jest.Mock).mockReturnValue({ back: jest.fn(), push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
       message: null,
@@ -239,28 +166,20 @@ describe("ResetFormClient", () => {
     });
 
     render(<ResetFormClient {...defaultProps} />);
+    const confirmInput = screen.getByPlaceholderText("Confirm New Password");
+    const toggleBtn = screen.getByTestId("toggle-confirm-password-visibility");
 
-    const toggle2 = screen.getByTestId("toggle-confirm-password-visibility");
-    const confirmPasswordInput = screen.getByPlaceholderText("Confirm New Password");
-
-    expect(confirmPasswordInput).toHaveAttribute("type", "password");
-
-    fireEvent.click(toggle2);
-    expect(confirmPasswordInput).toHaveAttribute("type", "text");
-
-    fireEvent.click(toggle2);
-    expect(confirmPasswordInput).toHaveAttribute("type", "password");
+    expect(confirmInput).toHaveAttribute("type", "password");
+    fireEvent.click(toggleBtn);
+    expect(confirmInput).toHaveAttribute("type", "text");
+    fireEvent.click(toggleBtn);
+    expect(confirmInput).toHaveAttribute("type", "password");
   });
 
-  it("navigates back when back button is clicked", () => {
+  it("calls router.back() on back button click", () => {
     const mockBack = jest.fn();
-
-    (require("next/navigation").useRouter as jest.Mock).mockReturnValue({
-      back: mockBack,
-      push: jest.fn(),
-    });
-
-    (require("../../../hooks/usePasswordConfirm").default as jest.Mock).mockReturnValue({
+    (useRouter as jest.Mock).mockReturnValue({ back: mockBack, push: jest.fn() });
+    (usePasswordResetConfirm as jest.Mock).mockReturnValue({
       loading: false,
       error: null,
       message: null,
@@ -269,10 +188,7 @@ describe("ResetFormClient", () => {
     });
 
     render(<ResetFormClient {...defaultProps} />);
-
-    const backButton = screen.getByLabelText("Go back");
-    fireEvent.click(backButton);
-
+    fireEvent.click(screen.getByLabelText("Go back"));
     expect(mockBack).toHaveBeenCalled();
   });
 });

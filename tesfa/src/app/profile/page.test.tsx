@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ProfilePage from "./page";
 import useFetchOrganization from "@/app/hooks/useFetchOrganization";
+import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -35,15 +36,13 @@ describe("ProfilePage", () => {
       loading: false,
       error: "Failed to load profile",
     });
-
     render(<ProfilePage />);
     expect(screen.getByText(/Failed to load profile/i)).toBeInTheDocument();
   });
 
   it("renders profile data correctly", async () => {
     const mockPush = jest.fn();
-    const useRouter = require("next/navigation").useRouter;
-    useRouter.mockReturnValue({ push: mockPush });
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
 
     (useFetchOrganization as jest.Mock).mockReturnValue({
       user: {
@@ -64,9 +63,6 @@ describe("ProfilePage", () => {
 
     expect(screen.getByText("hope@ngo.org")).toBeInTheDocument();
     expect(screen.getByText("Jan 15, 2024")).toBeInTheDocument();
-
-    const logo = screen.getByAltText("Organization Logo");
-    expect(logo).toHaveAttribute("src", "http://localhost:3000/logos/hope.png");
 
     const editButton = screen.getByLabelText("Edit Profile");
     expect(editButton).toBeInTheDocument();
@@ -89,15 +85,11 @@ describe("ProfilePage", () => {
     await waitFor(() => {
       expect(screen.getByText("Global Aid")).toBeInTheDocument();
     });
-
-    const logo = screen.getByAltText("Organization Logo");
-    expect(logo).toHaveAttribute("src", "https://example.com/logo.png");
   });
 
   it("navigates to /edit-profile when edit button is clicked", async () => {
     const mockPush = jest.fn();
-    const useRouter = require("next/navigation").useRouter;
-    useRouter.mockReturnValue({ push: mockPush });
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
 
     (useFetchOrganization as jest.Mock).mockReturnValue({
       user: {

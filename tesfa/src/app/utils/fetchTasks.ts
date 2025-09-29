@@ -27,7 +27,7 @@ export async function mapApiTask(apiTask: ApiTask): Promise<Task> {
     title: apiTask.title,
     description: apiTask.description,
     status: status,
-    priority: apiTask.priority,
+    priority: apiTask.priority
   };
 }
 

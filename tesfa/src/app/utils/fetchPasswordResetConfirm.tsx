@@ -1,6 +1,6 @@
 const baseUrl = '/api/password-reset-confirm';
 
-export async function fetchPasswordResetConfirm(payload: Record<string, any>) {
+export async function fetchPasswordResetConfirm(payload: { [key: string]: string | number | boolean | null | undefined }) {
   try {
     const response = await fetch(baseUrl, {
       method: 'POST',

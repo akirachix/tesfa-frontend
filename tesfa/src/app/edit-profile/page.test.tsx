@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import useFetchOrganization from '../hooks/useFetchOrganization';
 import { updateUser } from '../utils/fetchOrganizations';
 
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props: React.ComponentProps<'div'>) => <div data-testid="mocked-image" {...props} />,
+}));
+
 jest.mock('next/navigation', () => ({
   __esModule: true,
   useRouter: jest.fn(() => ({
@@ -22,15 +27,23 @@ jest.mock('../utils/fetchOrganizations', () => ({
 }));
 
 jest.mock('../sharedComponents/Layout', () => {
-  return ({ children }: { children: React.ReactNode }) => <div data-testid="layout">{children}</div>;
-});
+  const Layout = ({ children }: { children: React.ReactNode }) => <div data-testid="layout">{children}</div>;
+  Layout.displayName = 'LayoutMock';
+  return Layout;
+})
 
-jest.mock('lucide-react', () => ({
-  CameraIcon: () => <div data-testid="camera-icon" />,
-  Eye: () => <div data-testid="eye-icon" />,
-  EyeOff: () => <div data-testid="eye-off-icon" />,
-  Sidebar: () => <div data-testid="sidebar-icon" />,
-}));
+jest.mock('lucide-react', () => {
+  const CameraIcon = () => <div data-testid="camera-icon" />;
+  CameraIcon.displayName = 'CameraIcon';
+
+  const Eye = () => <div data-testid="eye-icon" />;
+  Eye.displayName = 'Eye';
+
+  const EyeOff = () => <div data-testid="eye-off-icon" />;
+  EyeOff.displayName = 'EyeOff';
+
+  return { CameraIcon, Eye, EyeOff };
+});
 
 const mockProfile = {
   id: 1,
@@ -54,6 +67,29 @@ describe('EditProfilePage', () => {
     });
 
     (updateUser as jest.Mock).mockResolvedValue(undefined);
+  });
+
+  it('renders loading state', () => {
+    (useFetchOrganization as jest.Mock).mockReturnValue({
+      user: null,
+      loading: true,
+      error: null,
+      refetch: jest.fn(),
+    });
+    render(<EditProfilePage />);
+    expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
+  });
+
+  it('renders error message', () => {
+    const error = 'Failed to load';
+    (useFetchOrganization as jest.Mock).mockReturnValue({
+      user: null,
+      loading: false,
+      error,
+      refetch: jest.fn(),
+    });
+    render(<EditProfilePage />);
+    expect(screen.getByText(error)).toBeInTheDocument();
   });
 
   it('submits form and navigates on success', async () => {

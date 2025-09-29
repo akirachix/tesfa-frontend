@@ -5,6 +5,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { FaSearch } from "react-icons/fa";
 import { useDashboardData } from "../../../hooks/useTaskPageData";
+import Image from "next/image";  
 
 export default function TasksAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,14 +99,14 @@ export default function TasksAdmin() {
     in_progress: "In Progress",
     cancelled: "Cancelled",
     pending: "Pending",
-   };
+  };
 
-   const getStatusDisplayName = (status?: string) => {
+  const getStatusDisplayName = (status?: string) => {
     if (!status) {
       return "Unknown";
     }
     return statusDisplayNames[status] || status;
-      };
+  };
 
   return (
     <div>
@@ -115,10 +116,12 @@ export default function TasksAdmin() {
             key={index}
             className="relative flex flex-col h-[22vh] w-[20vh] items-center"
           >
-            <img
+            <Image
               src="/Images/ellipse.png"
               alt="Ellipse"
               className="w-[20vh] h-[20vh] object-contain"
+              width={320}  
+              height={320} 
             />
             <span className="absolute top-1/2 text-[3em] -translate-y-3/4 text-xl font-bold text-gray-800">
               {stat.value}
@@ -172,7 +175,9 @@ export default function TasksAdmin() {
                   {organizationNameMap.get(assignment.organization) ||
                     `Org ID: ${assignment.organization}`}
                 </p>
-                <p className={getStatusColor(assignment.status)}>{getStatusDisplayName(assignment.status)}</p>
+                <p className={getStatusColor(assignment.status)}>
+                  {getStatusDisplayName(assignment.status)}
+                </p>
                 <p className="text-gray-600">
                   {new Date(assignment.created_at).toLocaleDateString()}
                 </p>

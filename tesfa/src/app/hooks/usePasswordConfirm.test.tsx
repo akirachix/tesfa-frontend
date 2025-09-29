@@ -6,7 +6,6 @@ jest.mock('../utils/fetchPasswordResetConfirm', () => ({
   fetchPasswordResetConfirm: jest.fn(),
 }));
 
-
 type ResetPayload = {
   uidb64: string;
   token: string;
@@ -87,8 +86,7 @@ describe('usePasswordResetConfirm', () => {
     await act(async () => {
       try {
         await result.current.confirmReset(payload);
-      } catch (e) {
-       
+      } catch {
       }
     });
 
@@ -151,29 +149,29 @@ describe('usePasswordResetConfirm', () => {
     expect(returnedValue).toEqual(mockResponse);
   });
 
-it('re-throws error after setting error state', async () => {
-  const errorMessage = 'Token expired';
-  mockFetch.mockRejectedValue(new Error(errorMessage));
+  it('re-throws error after setting error state', async () => {
+    const errorMessage = 'Token expired';
+    mockFetch.mockRejectedValue(new Error(errorMessage));
 
-  const { result } = renderHook(() => usePasswordResetConfirm());
+    const { result } = renderHook(() => usePasswordResetConfirm());
 
-  const payload: ResetPayload = {
-    uidb64: 'abc123',
-    token: 'xyz789',
-    new_password: 'newPass123!',
-    confirm_password: 'newPass123!',
-  };
+    const payload: ResetPayload = {
+      uidb64: 'abc123',
+      token: 'xyz789',
+      new_password: 'newPass123!',
+      confirm_password: 'newPass123!',
+    };
 
-  let caughtError: Error | null = null;
+    let caughtError: Error | null = null;
 
-  await act(async () => {
-    try {
-      await result.current.confirmReset(payload);
-    } catch (err) {
-      caughtError = err as Error;
-    }
+    await act(async () => {
+      try {
+        await result.current.confirmReset(payload);
+      } catch (err) {
+        caughtError = err as Error;
+      }
+    });
+    expect(caughtError).toEqual(expect.any(Error));
+    expect(result.current.error).toBe(errorMessage);
   });
-  expect(caughtError).toEqual(expect.any(Error));
-  expect(result.current.error).toBe(errorMessage); 
-});
 });

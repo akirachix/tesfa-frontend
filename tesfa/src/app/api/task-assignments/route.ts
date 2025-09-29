@@ -12,8 +12,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    if (!response.ok) {
+      throw new Error(`Backend API failed with status ${response.status}`);
+    }
+
     const result = await response.json();
-    return new Response(JSON.stringify(result), {
+    return new Response(JSON.stringify(result.results || []), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

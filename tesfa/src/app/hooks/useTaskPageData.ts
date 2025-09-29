@@ -60,7 +60,6 @@ export const useDashboardData = () => {
                 });
             } catch (error) {
                 setError(error as Error);
-                console.error("Failed to fetch dashboard data:", error);
             } finally {
                 setLoading(false);
             }

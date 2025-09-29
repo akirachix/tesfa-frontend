@@ -10,7 +10,8 @@ describe('fetchtasks utilities', () => {
       id: 123,
       title: 'Test Task',
       description: 'Test Description',
-      assignments: []
+      assignments: [],
+      priority: 'high'
     };
 
     it('maps a task with no assignments to a status of "pending"', async () => {
@@ -21,6 +22,7 @@ describe('fetchtasks utilities', () => {
         title: 'Test Task',
         description: 'Test Description',
         status: 'pending',
+         priority: 'high'
       };
 
       expect(result).toEqual(expected);
@@ -71,6 +73,7 @@ describe('fetchtasks utilities', () => {
         title: 'Another Task',
         description: 'No assignments array',
         status: 'pending',
+         priority: 'high'
       } as Omit<ApiTask, 'assignments'>;
 
       const result = await mapApiTask(apiTaskWithNoAssignments as ApiTask);
@@ -85,8 +88,8 @@ describe('fetchtasks utilities', () => {
     ];
 
     const mockApiTasks: ApiTask[] = [
-      { id: 1, title: 'Task One', description: 'Desc One', assignments: [] },
-      { id: 2, title: 'Task Two', description: 'Desc Two', assignments: [] },
+      { id: 1, title: 'Task One', description: 'Desc One', assignments: [],  priority: 'high' },
+      { id: 2, title: 'Task Two', description: 'Desc Two', assignments: [],  priority: 'high' },
     ];
 
     const mockHeaders: HeadersInit = {
