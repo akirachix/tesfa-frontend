@@ -241,7 +241,7 @@ export default function TasksDetails() {
         ) : searchQuery ? (
           <div className="flex justify-center items-center h-full">
             <p className="text-gray-500 text-lg">
-              No tasks found for "{searchQuery}"
+              No tasks found for &quot;{searchQuery}&quot;
             </p>
           </div>
         ) : (
