@@ -52,7 +52,7 @@ export const updateTaskAssignmentStatus = async (
 export async function createTaskAssignment(task: string, organization: string | null) {
   const token = getToken();
   const headers = buildHeaders(token);
-  const response = await fetch("/api/task-assignments", {
+  const response = await fetch("/api/task-assignments/", {
     method: "POST",
     headers,
     body: JSON.stringify({ task, organization }),

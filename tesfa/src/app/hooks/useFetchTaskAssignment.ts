@@ -20,6 +20,7 @@ export const useFetchTaskAssignments = () => {
       setLoading(true);
       try {
         const assignments = await fetchTaskAssignments();
+        console.log("Fetched Assignments:", assignments);
 
         if (!assignments || assignments.length === 0) {
           setLoading(false);
@@ -47,6 +48,7 @@ export const useFetchTaskAssignments = () => {
             status: assignment ? assignment.status : "pending",
           };
         });
+        console.log("Tasks with Assignments (formatted):", tasksWithAssignments);
 
         setAssignedTasks(tasksWithAssignments);
       } catch (error) {

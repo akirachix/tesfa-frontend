@@ -56,12 +56,11 @@ export default function TasksDetails() {
       );
 
       setSelectedTasks(new Set());
-      const newTasksForKanban = newAssignments.map((assignment) => {
-        const originalTask = tasks.find(
-          (task) => task.id === assignment.task.toString()
-        );
+      const newTasksForKanban = newAssignments.map((assignment, index) => {
+        const taskId = Array.from(selectedTasks)[index];
+        const originalTask = tasks.find((task) => task.id === taskId);
         return {
-          id: assignment.task.toString(),
+          id: taskId,
           title: originalTask ? originalTask.title : "New Task",
           description: originalTask ? originalTask.description : "",
           status: assignment.status,
