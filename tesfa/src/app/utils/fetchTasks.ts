@@ -49,15 +49,22 @@ export const fetchTasks = async (): Promise<ApiTask[]> => {
 export const fetchTasksForAssignments = (
   assignments: TaskAssignment[],
   headers: HeadersInit
-): Promise<ApiTask>[] => {
+): Promise<ApiTask | null>[] => {
   const taskPromises = assignments.map((assignment) =>
-    fetch(`/api/tasks/${assignment.task}/`, { headers }).then((response) => {
-      if (!response.ok) {
-        console.error(`Failed to fetch task ${assignment.task}`, response);
-        throw new Error(`Failed to fetch task ${assignment.task}`);
-      }
-      return response.json();
-    })
+    fetch(`/api/tasks/${assignment.task}/`, { headers })
+      .then((response) => {
+        if (!response.ok) {
+          console.error(`Failed to fetch task ${assignment.task}`, response);
+          return null;
+        }
+        return response.json();
+      })
+      .catch((error) => {
+        console.error(
+          `Failed to fetch task ${assignment.task} due to error: ${error}`
+        );
+        return null;
+      })
   );
   return taskPromises;
 };

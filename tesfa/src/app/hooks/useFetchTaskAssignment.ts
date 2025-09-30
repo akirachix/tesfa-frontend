@@ -33,8 +33,10 @@ export const useFetchTaskAssignments = () => {
         }
         const taskPromises = fetchTasksForAssignments(assignments, headers)
 
-        const tasksData: ApiTask[] = await Promise.all(taskPromises);
-        const formattedTasks = await Promise.all(tasksData.map(mapApiTask));
+        const tasksData = await Promise.all(taskPromises);
+        const formattedTasks = await Promise.all(
+          tasksData.filter((task): task is ApiTask => task !== null).map(mapApiTask)
+        );
         const tasksWithAssignments = formattedTasks.map((task) => {
           const assignment = assignments.find(
             (assignment) => assignment.task === parseInt(task.id)
@@ -50,7 +52,7 @@ export const useFetchTaskAssignments = () => {
       } catch (error) {
         console.error("An error occurred during the fetching process:", error);
         setError(error as Error);
-      } finally {
+      } finally {  
         setLoading(false);
       }
     };

@@ -127,7 +127,7 @@ describe('fetchtasks utilities', () => {
       expect(fetchedTasks).toEqual(mockApiTasks);
     });
 
-    it('should throw an error if any task fetch fails', async () => {
+    it('should return null for a task that fails to fetch', async () => {
       fetchSpy
         .mockResolvedValueOnce({
           ok: true,
@@ -140,11 +140,12 @@ describe('fetchtasks utilities', () => {
         });
 
       const taskPromises = fetchTasksForAssignments(mockAssignments, mockHeaders);
+      const fetchedTasks = await Promise.all(taskPromises);
 
-      await expect(Promise.all(taskPromises)).rejects.toThrow('Failed to fetch task 2');
       expect(fetchSpy).toHaveBeenCalledTimes(2);
       expect(fetchSpy).toHaveBeenCalledWith('/api/tasks/1/', { headers: mockHeaders });
       expect(fetchSpy).toHaveBeenCalledWith('/api/tasks/2/', { headers: mockHeaders });
+      expect(fetchedTasks).toEqual([mockApiTasks[0], null]);
     });
   });
 });
