@@ -249,10 +249,10 @@ export default function RegisterForm({
             id="terms"
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            className="mt-1 h-5 w-5 text-[#CDA12B] rounded focus:ring-[#CDA12B]"
+            className="mt-1 h-5 w-5 text-[#CDA12B] cursor-pointer rounded focus:ring-[#CDA12B]"
             required
           />
-          <label htmlFor="terms" className="ml-2 text-[#00353D] text-lg">
+          <label htmlFor="terms" className="ml-2 cursor-pointer  text-[#00353D] text-lg">
             I agree to the{" "}
             <Link href="/onboarding/terms" className="text-[#CDA12B] hover:underline">
               Terms and Conditions.

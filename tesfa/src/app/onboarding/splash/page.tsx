@@ -19,7 +19,7 @@ export default function SplashScreen() {
     <div className="flex flex-col items-center justify-center h-screen bg-[#fdf6f6] text-center px-4 py-8">
 
       <Image
-        src="/Images/Group 166.png" 
+        src="/Images/Group66.png" 
         alt="Logo"
         width={400}
         height={200}
